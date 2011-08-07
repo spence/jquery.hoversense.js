@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+   <title>Hover Sense | Demo</title>
+   <style>
+      #simple-nav { display:inline-block; height: 31px; border: 1px solid #DDDDDD; border-radius: 3px; font-family: helvetica,arial,freesans,clean,sans-serif; font-size: 12px; font-weight: bold; text-shadow: 1px 1px 0 #FEFEFE; }
+      #simple-nav, #simple-nav ul { margin: 0; padding: 0; }
+      #simple-nav li { float: left; list-style-type: none; display: block; text-align: left;  }
+      #simple-nav a { color: #333; text-decoration: none; border-left: 1px solid #FEFEFE;  border-right: 1px solid #DDDDDD; display: block; padding: 8px 10px; background-color: #F6F6F6; }
+      #simple-nav li:last-child a { border-right: none; }
+      #simple-nav li:first-child a { border-left: none; }
+      #simple-nav a:hover { color: #4183C4; }
+      #simple-nav ul { display: none; z-index: 1000; position: absolute; border: 1px solid #DDDDDD; background-color: #F6F6F6; }
+      #simple-nav ul li { float: none;  } 
+      #simple-nav ul a { border: none; }
+   </style>
+</head>
+<body>
+
+   <ul id="simple-nav">
+      <li>
+         <a href="#">Item 1</a>
+         <ul>
+            <li><a href="#">Item a</a></li>
+            <li><a href="#">Item b - Text</a></li>
+            <li><a href="#">c</a></li>
+            <li><a href="#">Item d - Extra Long Text</a></li>
+         </ul>
+      </li>
+      <li>
+         <a href="#">Item 2 - Text</a>
+         <ul>
+            <li><a href="#">Item a</a></li>
+            <li><a href="#">Item b - Text</a></li>
+            <li><a href="#">c</a></li>
+            <li><a href="#">Item d - Extra Long Text</a></li>
+         </ul>
+      </li>
+      <li>
+         <a href="#">3</a>
+         <ul>
+            <li><a href="#">Item a</a></li>
+            <li><a href="#">Item b - Text</a></li>
+            <li><a href="#">c</a></li>
+            <li><a href="#">Item d - Extra Long Text</a></li>
+         </ul>
+      </li>
+      <li>
+         <a href="#">Item 4 - Extra Long Text</a>
+         <ul>
+            <li><a href="#">Item a</a></li>
+            <li><a href="#">Item b - Text</a></li>
+            <li><a href="#">c</a></li>
+            <li><a href="#">Item d - Extra Long Text</a></li>
+         </ul>
+      </li>
+   </ul>
+
+   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+   <script src="jquery.hoversense.js"></script>
+
+   <script>
+   $('#simple-nav > li').hoverSense();
+   </script>
+
+</body>
+</html>
