@@ -1,8 +1,8 @@
 /*
- *  jQuery Plugin - Hover Sense - Version 0.5 (8/7/2011)
+ *  jQuery Plugin - Hover Sense - Version 0.3 (8/7/2011)
  * 
  *  jQuery.hover() replacement plugin
- *  http://spen.cc/2370asd9f
+ *  http://projects.spencercreasey.com/hoversense/
  * 
  *  Copyright 2011 Spencer Creasey (http://spencercreasey.com)
  *  Dual licensed under the MIT and GPL Licenses.
