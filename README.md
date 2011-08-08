@@ -5,6 +5,8 @@ Hover Intent tracks the users mouse coordinates. It also allows multiple dropdow
 
 This plugin handles hiding and showing dropdown items by queuing timer ids.
 
+Example: http://projects.spencercreasey.com/hoversense/
+
 # History
 
 0.5 : Initial Commit
