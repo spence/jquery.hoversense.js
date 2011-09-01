@@ -1,7 +1,7 @@
 jQuery Plugin - Hover Sense 
 =============
 
-Hover Intent tracks the users mouse coordinates. It also allows multiple dropdown items to be open at once. Neither of which I'm a fan of.
+Hover Intent tracks the users mouse coordinates. It also allows multiple dropdown items to be open at once. Neither of which I'm a fan.
 
 This plugin handles hiding and showing of dropdown items by queuing timer ids.
 

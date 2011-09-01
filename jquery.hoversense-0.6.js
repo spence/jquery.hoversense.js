@@ -1,106 +1,206 @@
-/*
- *  jQuery Plugin - Hover Sense - Version 0.3 (8/7/2011)
+/**
+ * jQuery Plugin - Hover Sense - Version 0.6 (8/31/2011)
  * 
- *  jQuery.hover() replacement plugin
- *  http://projects.spencercreasey.com/hoversense/
+ * jQuery.hover() replacement plugin
+ * http://spencercreasey.com/projects/hoversense
  * 
- *  Copyright 2011 Spencer Creasey (http://spencercreasey.com)
- *  Dual licensed under the MIT and GPL Licenses.
- *
+ * Copyright 2011 Spencer Creasey (http://spencercreasey.com)
+ * Dual licensed under the MIT and GPL Licenses.
  */
 (function($) {
-
+   
+   /**
+    * // Basic Usage (no arguments -- uses defaults)
+    * $('ul > li').hoverSense(); 
+    * 
+    * // Basic Usage (specify both MouseIn / MouseOut functions)
+    * $('ul > li').hoverSense(
+    *   function(node){ node.slideDown(300); },
+    *   function(node){ node.fadeOut(200); }
+    * });
+    * 
+    * // Advanced Usage (single argument as configuration -- nothing is required)
+    * $('ul > li').hoverSense({
+    *   openWait: 350, // Time in milliseconds to wait for a tab to open
+    *   openSiblingWait: 150, // Time in milliseconds to wait for a tab to open, if another tab is already open
+    *   closeWait: 300, // Time in milliseconds to wait for a tab to close
+    *   baseZIndex: // Starting value for CSS 'z-index'
+    *   fnOver: function(item){ item.show(); } // Show functions
+    *   fnOut: function(item){ item.hide(); } // Hide function
+    * });
+    *
+    * // None of the above arguments are required. To change only the time to open a tab:
+    * $('ul > li').hoverSense({ openWait: 250 });
+    *
+    * @param {function(!Node)|{
+    *   openWait: number,
+    *   openSiblingWait: number,
+    *   closeWait: number,
+    *   baseZIndex: number,
+    *   fnOver: function(!Node),
+    *   fnOut: function(!Node)
+    * }} fnOver Open function or configuration.
+    * @param {function(!Node)=} fnOut Close function or none, if config given as first arg.
+    * @author Spencer Creasey
+    */
    $.fn.hoverSense = function( fnOver, fnOut ) {
 
-      // Init configuration:
-      // - allows 0 arguments (use defaults)
-      // - 2 args (hide & show handlers)
-      // - 1 arg (custom configuration to merge)
+      // Merge config
       var options = $.extend({
          
-         openWait : 350, // how long (ms) to wait for first hover of any tab to open
-         siblingWait : 150, // how long to wait for a tab to open, if another tab is already open
-         closeWait : 300, // how long should a tab wait to close
-         fnOver : function( elem ) { elem.show(); },
-         fnOut : function( elem ) { elem.hide(); }
+         // Time in milliseconds to wait for a tab to open
+         openWait : 350, 
+
+         // Time in milliseconds to wait for a tab to open, if another tab is already open
+         // - (We know the user already wants to navigate tabs, lets make the transition 
+         //    to other tabs quicker.)
+         openSiblingWait : 150, 
+
+         // Time in milliseconds to wait for a tab to close
+         closeWait : 300, 
+
+         // Starting value for CSS 'z-index'
+         // - specify if menu items display below existing content
+         baseZIndex : 1000,
+
+         // Hide/Show functions (CSS 'display:none|block')
+         fnOver : function( node ) { node.show(); },
+         fnOut : function( node ) { node.hide(); }
          
-      }, fnOut ? { fnOver : fnOver, fnOut : fnOut } : fnOver);
+      }, fnOut ? { fnOver : fnOver, fnOut : fnOut } : fnOver),
       
-      // Setup opening/closing timers
-      var openTimers = [], closeTimers = [], openTab = null, idCounter = 1;
+      // Hash of opening/closing requests (timers),
+      openTimers = {}, closeTimers = {}, 
+       
+      // Reference to any currently open item
+      openItem = null, 
+          
+      // Incrementing identifier assigned to menu items
+      // - used to quickly lookup open/close request
+      idCounter = 1;
       
-      // return jQuery object
+      // Maintain cascading jQuery calls
       return this.hover(
          
-         function () { 
+         // -- MouseEnter Event --
+         function (event) { 
+
+            // Store reference to current menu item
+            var item = this; // event.currentTarget || event.srcElement;
+
+            // Check for close-request against the current item
+            if (closeTimers[item.__refId]) {
             
-            // -- On Hover --
-            
-            // If a timer was issued to close the current item, cancel it
-            if (closeTimers[this.__refId]) {
-            
-               clearTimeout(closeTimers[this.__refId]);
-               closeTimers[this.__refId] = 0;
-               
-               // no need to re-open the item
+               // -- Item is already open --
+
+               // Clear close-request
+               clearTimeout(closeTimers[item.__refId]);
+
+               // Remove reference to close-request
+               closeTimers[item.__refId] = 0;
                
             } else { 
             
                // -- Opening a new item --
-            
+
                // How long should the user wait to see a new item?
                // - if there is already an open tab
                // - vs. nothing open
-               var openWait = (openTab ? options.siblingWait : options.openWait);
+               var wait = (openItem ? options.openSiblingWait : options.openWait);
                
                // Generate unique id for element
-               if (!this.__refId) this.__refId = idCounter++;
+               // - used to cancel the request to open, if needed
+               if (!item.__refId) {
+                  item.__refId = idCounter++;
+               }
                
-               // Issue timer to show current item
-               var menu = this; // store ref to current hover menu item
-               openTimers[this.__refId] = setTimeout(function () {
+               // Issue open-request to show current item
+               openTimers[item.__refId] = setTimeout(function () {
                   
-                  // Close any item still open
-                  if (openTab) {
-                     // Cancel timer issued to close it
-                     if (closeTimers[openTab.__refId]) {
-                        clearTimeout(closeTimers[openTab.__refId]);
-                        closeTimers[openTab.__refId] = 0;
+                  // store reference to child dropdown
+                  var itemDropdown = $('ul', item);
+
+                  // Check for already open item
+                  if (openItem) {
+
+                     // Check to see if a close-request has been issued for it
+                     if (closeTimers[openItem.__refId]) {
+
+                        // Cancel request
+                        clearTimeout(closeTimers[openItem.__refId]);
+
+                        // Remove reference to request
+                        closeTimers[openItem.__refId] = 0;
                      }
-                     options.fnOut($('ul', openTab)); // hide item
+
+                     // Close item's dropdown
+                     options.fnOut($('ul', openItem)); 
                   }
                   
-                  // clear open timer ref
-                  if (openTimers[menu.__refId]) openTimers[menu.__refId] = 0; 
+                  // Clear open-request reference
+                  if (openTimers[item.__refId]) {
+                     openTimers[item.__refId] = 0; 
+                  }
                   
-                  // store reference to new open tab
-                  openTab = menu; 
-                  options.fnOver($('ul', menu)); // show item
+                  // Store reference to current item 
+                  openItem = item; 
+
+                  // set z-index
+                  itemDropdown.css({ zIndex : options.baseZIndex + 1 });
+
+                  // Open item's dropdown
+                  options.fnOver(itemDropdown);
                   
-               }, openWait);
+               }, wait);
             }
          }, 
-         function () { 
+
+         // -- MouseOut Event --
+         function (event) { 
          
-            // -- On (Hover) Out --
-            
+            // Store reference to current menu item
+            var item = this; // event.currentTarget || event.srcElement;
+
+            // Store reference to dropdown
+            var itemDropdown = $('ul', item)
+
+            // Reset CSS z-index
+            itemDropdown.css({ zIndex : options.baseZIndex });
+
             // Generate unique id for element
-            if (!this.__refId) this.__refId = idCounter++;
+            if (!item.__refId) {
+               item.__refId = idCounter++;
+            }
             
-            // Clear any timer on the current item to prevent it from being shown
-            if (openTimers[this.__refId]) {
-               clearTimeout(openTimers[this.__refId]);
-               openTimers[this.__refId] = 0;
+            // Is there a request to open the current item?
+            if (openTimers[item.__refId]) {
+               
+               // Clear open-request
+               clearTimeout(openTimers[item.__refId]);
+
+               // Clear reference to open-request
+               openTimers[item.__refId] = 0;
             }
             
             // If another tab was opened, the current tab is already queued to close. Otherwise, close.
-            if (openTab == this) {
-            
-               var menu = this; // store ref to current hover menu item
-               closeTimers[openTab.__refId] = setTimeout(function () {
-                  if (closeTimers[menu.__refId]) closeTimers[menu.__refId] = 0; // clear close timer ref
-                  if (openTab == menu) openTab = 0; // remove ref 
-                  options.fnOut($('ul', menu)); // close item
+            if (openItem == item) {
+
+               // Issue request (timer) to close dropdown
+               closeTimers[openItem.__refId] = setTimeout(function () {
+                  
+                  // Clear reference to close-request
+                  if (closeTimers[item.__refId]) {
+                     closeTimers[item.__refId] = 0;
+                  }
+
+                  // Clear reference to the open item, since there are none
+                  if (openItem == item) {
+                     openItem = 0;  
+                  }
+
+                  // Close item's dropdown
+                  options.fnOut(itemDropdown); // close item
+
                }, options.closeWait);
                
             }

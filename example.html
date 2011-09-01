@@ -10,7 +10,7 @@
       #simple-nav li:last-child a { border-right: none; }
       #simple-nav li:first-child a { border-left: none; }
       #simple-nav a:hover { color: #4183C4; }
-      #simple-nav ul { display: none; z-index: 1000; position: absolute; border: 1px solid #DDDDDD; background-color: #F6F6F6; }
+      #simple-nav ul { display: none; position: absolute; border: 1px solid #DDDDDD; background-color: #F6F6F6; }
       #simple-nav ul li { float: none;  } 
       #simple-nav ul a { border: none; }
    </style>
@@ -57,10 +57,13 @@
    </ul>
 
    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
-   <script src="jquery.hoversense.min.js"></script>
+   <script src="jquery.hoversense.min-0.6.jscompress.com.js"></script>
 
    <script>
-   $('#simple-nav > li').hoverSense();
+   $('#simple-nav > li').hoverSense(
+      function(node){ node.slideDown(300); },
+      function(node){ node.fadeOut(200); }
+   );
    </script>
 
 </body>
