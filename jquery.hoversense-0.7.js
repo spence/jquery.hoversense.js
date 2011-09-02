@@ -1,5 +1,5 @@
 /**
- * jQuery Plugin - HoverSense - Version 0.6 (8/31/2011)
+ * jQuery Plugin - HoverSense - Version 0.7 (9/1/2011)
  * 
  * jQuery.hover() replacement plugin
  * http://spencercreasey.com/projects/hoversense
@@ -41,6 +41,7 @@
     *   fnOut: function(!Node)
     * }} fnOver Open function or configuration.
     * @param {function(!Node)=} fnOut Close function or none, if config given as first arg.
+    * @return {Object} jQuery object
     * @author Spencer Creasey
     */
    $.fn.hoverSense = function( fnOver, fnOut ) {
@@ -68,17 +69,10 @@
          fnOut : function( node ) { node.hide(); }
          
       }, fnOut ? { fnOver : fnOver, fnOut : fnOut } : fnOver),
-      
-      // Hash of opening/closing requests (timers),
-      openTimers = {}, closeTimers = {}, 
-       
+
       // Reference to any currently open item
-      openItem = null, 
-          
-      // Incrementing identifier assigned to menu items
-      // - used to quickly lookup open/close request
-      idCounter = 1;
-      
+      openItem = null;
+
       // Maintain cascading jQuery calls
       return this.hover(
          
@@ -89,15 +83,15 @@
             var item = this; // event.currentTarget || event.srcElement;
 
             // Check for close-request against the current item
-            if (closeTimers[item.__refId]) {
+            if (item.__close) {
             
                // -- Item is already open --
 
-               // Clear close-request
-               clearTimeout(closeTimers[item.__refId]);
+               // Cancel close-request
+               clearTimeout(item.__close);
 
                // Remove reference to close-request
-               closeTimers[item.__refId] = 0;
+               item.__close = 0; 
                
             } else { 
             
@@ -108,15 +102,12 @@
                // - vs. nothing open
                var wait = (openItem ? options.openSiblingWait : options.openWait);
                
-               // Generate unique id for element
-               // - used to cancel the request to open, if needed
-               if (!item.__refId) {
-                  item.__refId = idCounter++;
-               }
-               
                // Issue open-request to show current item
-               openTimers[item.__refId] = setTimeout(function () {
+               item.__open = setTimeout(function () {
                   
+                  // Clear open-request reference
+                  item.__open = 0;
+
                   // store reference to child dropdown
                   var itemDropdown = $('ul', item);
 
@@ -124,24 +115,19 @@
                   if (openItem) {
 
                      // Check to see if a close-request has been issued for it
-                     if (closeTimers[openItem.__refId]) {
+                     if (openItem.__close) {
 
                         // Cancel request
-                        clearTimeout(closeTimers[openItem.__refId]);
+                        clearTimeout(openItem.__close);
 
                         // Remove reference to request
-                        closeTimers[openItem.__refId] = 0;
+                        openItem.__close = 0;
                      }
 
                      // Close item's dropdown
                      options.fnOut($('ul', openItem)); 
                   }
-                  
-                  // Clear open-request reference
-                  if (openTimers[item.__refId]) {
-                     openTimers[item.__refId] = 0; 
-                  }
-                  
+
                   // Store reference to current item 
                   openItem = item; 
 
@@ -166,34 +152,27 @@
 
             // Reset CSS z-index
             itemDropdown.css({ zIndex : options.baseZIndex });
-
-            // Generate unique id for element
-            if (!item.__refId) {
-               item.__refId = idCounter++;
-            }
             
             // Is there a request to open the current item?
-            if (openTimers[item.__refId]) {
+            if (item.__open) {
                
                // Clear open-request
-               clearTimeout(openTimers[item.__refId]);
+               clearTimeout(item.__open);
 
                // Clear reference to open-request
-               openTimers[item.__refId] = 0;
+               item.__open = 0;
             }
             
             // If another tab was opened, the current tab is already queued to close. Otherwise, close.
             if (openItem == item) {
 
                // Issue request (timer) to close dropdown
-               closeTimers[openItem.__refId] = setTimeout(function () {
+               openItem.__close = setTimeout(function () {
                   
                   // Clear reference to close-request
-                  if (closeTimers[item.__refId]) {
-                     closeTimers[item.__refId] = 0;
-                  }
+                  item.__close = 0;
 
-                  // Clear reference to the open item, since there are none
+                  // Clear reference to the open item, if nothing else is open
                   if (openItem == item) {
                      openItem = 0;  
                   }
