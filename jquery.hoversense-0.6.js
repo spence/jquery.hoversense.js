@@ -1,10 +1,10 @@
 /**
- * jQuery Plugin - Hover Sense - Version 0.6 (8/31/2011)
+ * jQuery Plugin - HoverSense - Version 0.6 (8/31/2011)
  * 
  * jQuery.hover() replacement plugin
  * http://spencercreasey.com/projects/hoversense
  * 
- * Copyright 2011 Spencer Creasey (http://spencercreasey.com)
+ * Copyright 2011 Spencer Creasey
  * Dual licensed under the MIT and GPL Licenses.
  */
 (function($) {
@@ -25,8 +25,8 @@
     *   openSiblingWait: 150, // Time in milliseconds to wait for a tab to open, if another tab is already open
     *   closeWait: 300, // Time in milliseconds to wait for a tab to close
     *   baseZIndex: // Starting value for CSS 'z-index'
-    *   fnOver: function(item){ item.show(); } // Show functions
-    *   fnOut: function(item){ item.hide(); } // Hide function
+    *   fnOver: function(node){ node.show(); } // Show functions
+    *   fnOut: function(node){ node.hide(); } // Hide function
     * });
     *
     * // None of the above arguments are required. To change only the time to open a tab:
