@@ -9,6 +9,7 @@ Example: http://projects.spencercreasey.com/hoversense/
 
 # History
 
+0.6 : Corrected overlapping dropdown menus (added z-index to items)
 0.5 : Initial Commit
 
 Using 0.5 since I've written this a dozen times and it _should_ closely resemble what aready sits on several production websites. 
